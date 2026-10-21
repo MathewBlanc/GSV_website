@@ -1,0 +1,601 @@
+/* ==========================================================================
+   Geospatial Sciences Victoria — Option 1: "Graticule"
+   A quiet, precise, surveyed page. Ink on paper, with a map grid underneath.
+   ========================================================================== */
+
+:root {
+  --paper: #F4F9FA;
+  --white: #FFFFFF;
+  --ink: #0B1F16;
+  --green: #136238;
+  --green-dark: #0E4A2A;
+  --blue: #59A6D9;
+  --muted: #5E7268;
+  --rule: rgba(11, 31, 22, 0.12);
+  --grid-fine: rgba(19, 98, 56, 0.09);
+  --grid-index: rgba(19, 98, 56, 0.17);
+
+  --measure: 60ch;
+  --gutter: clamp(1.5rem, 5vw, 5rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+/* --- Accessibility: skip link -------------------------------------------- */
+
+.skip-link {
+  position: absolute;
+  z-index: 100;
+  left: 1rem;
+  top: -4rem;
+  padding: 0.85rem 1.4rem;
+  background: var(--green);
+  color: #FFFFFF;
+  font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: top 160ms ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-variation-settings: "wdth" 100;
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- The graticule ------------------------------------------------------ */
+
+.graticule {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right,  var(--grid-index) 0 1px, transparent 1px 320px),
+    repeating-linear-gradient(to bottom, var(--grid-index) 0 1px, transparent 1px 320px),
+    repeating-linear-gradient(to right,  var(--grid-fine) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to bottom, var(--grid-fine) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(130% 100% at 20% 0%, #000 25%, transparent 92%);
+  mask-image: radial-gradient(130% 100% at 20% 0%, #000 25%, transparent 92%);
+}
+
+/* --- Shell -------------------------------------------------------------- */
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) clamp(2.5rem, 6vw, 4rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.coordinate {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.masthead {
+  position: relative;
+  z-index: 2;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter);
+  background: var(--white);
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: clamp(0.85rem, 2vw, 1.25rem) 0;
+}
+
+.masthead__brand {
+  display: block;
+  flex: none;
+  line-height: 0;
+}
+
+.masthead__brand:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.masthead__logo {
+  display: block;
+  width: auto;
+  height: clamp(48px, 6vw, 72px);
+}
+
+.masthead__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 3vw, 2rem);
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.masthead__nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding-bottom: 3px;
+  border-bottom: 1px solid transparent;
+}
+
+.masthead__nav a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--rule);
+}
+
+.masthead__nav a[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--green);
+}
+
+.masthead__nav a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* --- Mobile menu toggle --------------------------------------------------
+   Hidden by default: the nav is a plain visible list unless masthead.js
+   confirms it can manage a toggle (see the `has-js` class in <head>), so a
+   no-JS visitor always gets a working, if unglamorous, nav. */
+
+.masthead__toggle {
+  display: none;
+  align-items: center;
+  gap: 0.65rem;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  cursor: pointer;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.masthead__toggle-box {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 22px;
+  height: 14px;
+}
+
+.masthead__toggle-bar {
+  display: block;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 1px;
+  transition: transform 200ms ease, opacity 150ms ease;
+}
+
+.masthead__toggle[aria-expanded="true"] .masthead__toggle-bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.masthead__toggle[aria-expanded="true"] .masthead__toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.masthead__toggle[aria-expanded="true"] .masthead__toggle-bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.masthead__toggle:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.masthead__coordinates {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.coordinate--end { text-align: right; }
+
+@media (max-width: 640px) {
+  html.has-js .masthead__toggle { display: inline-flex; }
+
+  html.has-js .masthead__nav {
+    display: none;
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--rule);
+    box-shadow: 0 12px 24px -16px rgba(11, 31, 22, 0.35);
+  }
+
+  html.has-js .masthead__nav.is-open { display: flex; }
+
+  html.has-js .masthead__nav a {
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  html.has-js .masthead__nav a:last-child { border-bottom: none; }
+
+  .masthead__coordinates {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .coordinate--end { text-align: left; }
+}
+
+/* --- Hero --------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(3rem, 8vw, 5.5rem);
+}
+
+.eyebrow {
+  margin: 0 0 clamp(0.85rem, 2vw, 1.25rem);
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.8rem, 1.4vw, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.headline {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.85rem, 5.5vw, 3.5rem);
+  font-weight: 700;
+  font-variation-settings: "wdth" 112;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.headline__line { display: block; }
+.headline__line--accent { color: var(--green); }
+
+.lede {
+  max-width: 46ch;
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.5rem);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.standfirst {
+  max-width: var(--measure);
+  margin: 0 0 clamp(2rem, 4vw, 2.75rem);
+  color: var(--muted);
+}
+
+/* --- Actions ------------------------------------------------------------ */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.action {
+  display: inline-block;
+  padding: 0.95rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.action--primary {
+  background: var(--green);
+  color: #FFFFFF;
+}
+
+.action--primary:hover { background: var(--green-dark); }
+
+.action--ghost {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.action--ghost:hover { background: rgba(19, 98, 56, 0.07); }
+
+.action:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* --- The survey marker (signature detail) ------------------------------- */
+
+.marker {
+  position: absolute;
+  right: 0;
+  bottom: clamp(3rem, 8vw, 5.5rem);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.marker__crosshair {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+.marker__crosshair::before,
+.marker__crosshair::after {
+  content: "";
+  position: absolute;
+  background: var(--blue);
+}
+
+.marker__crosshair::before { left: 0; right: 0; top: 50%; height: 1px; }
+.marker__crosshair::after { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+.marker__label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .marker { display: none; }
+}
+
+/* --- Legal document (Articles of Association) --------------------------- */
+
+.legal {
+  position: relative;
+  z-index: 1;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) clamp(3rem, 7vw, 5rem);
+  background: var(--white);
+}
+
+.legal-header {
+  max-width: none;
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.legal-title {
+  margin: 0 0 0.85rem;
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  font-weight: 700;
+  font-variation-settings: "wdth" 112;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.legal-title em {
+  font-style: normal;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.legal-meta {
+  margin: 0.2rem 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.legal-toc {
+  max-width: none;
+  margin: 0 0 clamp(2.5rem, 6vw, 4rem);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  background: var(--white);
+  border: 1px solid var(--rule);
+}
+
+.legal-toc h2 {
+  margin: 0 0 1rem;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.legal-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: 2rem;
+}
+
+.legal-toc li {
+  break-inside: avoid;
+  margin-bottom: 0.55rem;
+}
+
+.legal-toc a {
+  display: block;
+  padding: 0.1rem 0;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.legal-toc a:hover { color: var(--green); }
+
+.legal-toc a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .legal-toc ol { columns: 1; }
+}
+
+.rule-heading {
+  color: var(--ink);
+  font-variation-settings: "wdth" 112;
+}
+
+.rule-heading--h2 {
+  margin: clamp(2.5rem, 6vw, 3.5rem) 0 1rem;
+  font-size: clamp(1.25rem, 2.6vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  scroll-margin-top: 1.5rem;
+}
+
+.rule-heading--h2:first-child { margin-top: 0; }
+
+.rule-heading--h3 {
+  margin: 1.75rem 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  scroll-margin-top: 1.5rem;
+}
+
+.rule-heading--h4 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+  scroll-margin-top: 1.5rem;
+}
+
+.rule-number {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  color: var(--green);
+  margin-right: 0.2em;
+}
+
+.legal p {
+  max-width: var(--measure);
+  margin: 0 0 1rem;
+}
+
+.rule-list {
+  max-width: var(--measure);
+  margin: 0 0 1rem;
+  padding-left: 1.5em;
+}
+
+.rule-list .rule-list {
+  max-width: none;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rule-list li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.25em;
+}
+
+.rule-list.m-alpha-paren > li::marker { content: "(" counter(list-item, lower-alpha) ") "; }
+.rule-list.m-alpha-dot > li::marker { content: counter(list-item, lower-alpha) ". "; }
+.rule-list.m-roman-dot > li::marker { content: counter(list-item, lower-roman) ". "; }
+.rule-list.m-decimal-dot > li::marker { content: counter(list-item, decimal) ". "; }
+
+.rule-list.m-alpha-paren > li::marker,
+.rule-list.m-alpha-dot > li::marker,
+.rule-list.m-roman-dot > li::marker,
+.rule-list.m-decimal-dot > li::marker {
+  color: var(--green);
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+ul.rule-list.m-bullet-disc { list-style-type: disc; }
+ul.rule-list.m-bullet-circle { list-style-type: circle; }
+ul.rule-list.m-bullet-square { list-style-type: square; }
+ul.rule-list > li::marker { color: var(--green); }
+
+/* --- Footer ------------------------------------------------------------- */
+
+.footer {
+  margin-top: auto;
+  padding-top: clamp(3rem, 7vw, 5rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.footer__acknowledgement {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* --- Load sequence ------------------------------------------------------ */
+
+.eyebrow,
+.headline,
+.lede,
+.standfirst,
+.actions,
+.marker {
+  animation: rise 720ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.eyebrow { animation-delay: 0ms; }
+.headline { animation-delay: 70ms; }
+.lede { animation-delay: 140ms; }
+.standfirst { animation-delay: 200ms; }
+.actions { animation-delay: 260ms; }
+.marker { animation-delay: 380ms; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
